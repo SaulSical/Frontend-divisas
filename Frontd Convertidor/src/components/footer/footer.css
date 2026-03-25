@@ -1,0 +1,28 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+
+#root,
+main {
+  min-height: 100vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  margin-top: auto;
+  padding: 12px;
+  text-align: center;
+  background-color: #e8edff;
+  border-top: 1px solid #1322ecb6;
+}
+
+.footer p {
+  margin: 0;
+  color: #444444c0;
+}
