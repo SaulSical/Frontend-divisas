@@ -26,9 +26,9 @@ export const convertData = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status({
+        return res.status(500).json({
             msg: 'Se produjo un error al realizar la conversión',
-            error
+            error: error.message
         });
     }
 }

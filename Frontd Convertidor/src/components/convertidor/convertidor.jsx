@@ -1,6 +1,6 @@
 import { useState } from "react"
 import axios from "axios"
-import './Convertidor.css'
+import './convertidor.css'
  
 export const Convertidor = () => {
  
@@ -12,10 +12,11 @@ export const Convertidor = () => {
  
     const [ result, setResult ] = useState(null);
     const [ error, setError ] = useState('');
+    const [ isLoading, setIsLoading ] = useState(false);
  
     const currencyCode = ['GTQ', 'USD', 'EUR', 'MXN', 'HNL', 'CAD']
  
-    const handleChance = (evento) => {
+    const handleChange = (evento) => {
         const { name, value } = evento.target;
         setFormData((prevData) => ({
             ...prevData,
@@ -25,21 +26,40 @@ export const Convertidor = () => {
  
     const handleSubmit = async (evento) => {
         evento.preventDefault();
+        setError('');
+
+        if(!formData.from || !formData.to || !formData.amount){
+            setResult(null);
+            setError('Completa todos los campos');
+            return;
+        }
+
+        if(Number(formData.amount) <= 0){
+            setResult(null);
+            setError('El monto debe ser mayor a 0');
+            return;
+        }
+
+        setIsLoading(true);
+
         try {
  
             const response = await axios.post(
                 'http://localhost:3000/api/v1/convert',
-                formData
+                {
+                    ...formData,
+                    amount: Number(formData.amount)
+                }
             );
  
             setResult(response.data);
             setError('');
  
         } catch (error) {
-            setError(
-                'Error',
-                error?.response ? error?.response.data : error.message
-            )
+            setResult(null);
+            setError(error?.response?.data?.msg || 'No se pudo realizar la conversión');
+        } finally {
+            setIsLoading(false);
         }
     }
  
@@ -50,8 +70,9 @@ export const Convertidor = () => {
                     <select
                         name="from"
                         value={formData.from}
-                        onChange={handleChance}
+                                onChange={handleChange}
                        className="input"
+                                required
                     >
                         <option value="">Moneda de origen</option>
                         {
@@ -67,8 +88,9 @@ export const Convertidor = () => {
                     <select
                         name="to"
                         value={formData.to}
-                        onChange={handleChance}
+                                onChange={handleChange}
                        className="input"
+                                required
                     >
                         <option value="">Moneda de destino</option>
                         {currencyCode.map((code) => {
@@ -82,13 +104,16 @@ export const Convertidor = () => {
                     <input  
                         name="amount"
                         value={formData.amount}
-                        onChange={handleChance}
+                        onChange={handleChange}
                         placeholder="Escribe el monto a convertir"
                         type="number"
                         className="input"
+                        min="0.01"
+                        step="0.01"
+                        required
                     />
-                    <button type="submit" className="submit-btn">
-                        Convertir
+                    <button type="submit" className="submit-btn" disabled={isLoading}>
+                        {isLoading ? 'Convirtiendo...' : 'Convertir'}
                     </button>
                 </form>
                 {result && (
